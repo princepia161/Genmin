@@ -9,10 +9,10 @@ import core as helper  # Aapki download/upload file
 from app import generate_drm_keys
 
 # ===== BOT SETUP =====
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "YAHAN_APNA_BOT_TOKEN_DALEIN")
-API_ID = int(os.environ.get("API_ID", "YAHAN_API_ID_DALEIN"))
-API_HASH = os.environ.get("API_HASH", "YAHAN_API_HASH_DALEIN")
-OWNER_ID = [int(os.environ.get("OWNER_ID", "5938871512"))] # Apna Telegram ID dalein
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8564398983:AAGxMpPkmLcgZsPnVzIQzCUIro5KNk76QBw")
+API_ID = int(os.environ.get("API_ID", "20807000"))
+API_HASH = os.environ.get("API_HASH", "cde2366a7c61e23f4cb44618cbe6cf70")
+OWNER_ID = [int(os.environ.get("OWNER_ID", "890749443"))] # Apna Telegram ID dalein
 
 bot = Client("AdvanceBot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
 
