@@ -10,10 +10,10 @@ import core as helper
 from app import generate_drm_keys
 
 # ===== CONFIGURATION =====
-API_ID = 20807000
-API_HASH = 'cde2366a7c61e23f4cb44618cbe6cf70'
-BOT_TOKEN = '7686849126:AAFjtFz6YZlLP-FnadMvrFTJIsphVr1OYEY' # ⚠️ अपना टोकन यहाँ बदलें
-OWNER_ID = [890749443] # ⚠️ आपकी सही ID
+API_ID = 35822069
+API_HASH = '35cea1c5e6384f57e914ac982ff5ffd1'
+BOT_TOKEN = '8338892359:AAFQ9LctB2s_Efp3ULPLdW9RvOVFCHYWIHg' # ⚠️ अपना टोकन यहाँ बदलें
+OWNER_ID = [5938871512] # ⚠️ आपकी सही ID
 
 # in_memory=True: यह सबसे ज़रूरी है ताकि Session फाइल करप्ट न हो
 bot = Client("ProDownloader", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, in_memory=True)
