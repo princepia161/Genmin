@@ -22,10 +22,11 @@ from app import generate_drm_keys
 # ===== BOT SETUP =====
 API_ID = 20807000
 API_HASH = 'cde2366a7c61e23f4cb44618cbe6cf70'
-BOT_TOKEN = '8564398983:AAGxMpPkmLcgZsPnVzIQzCUIro5KNk76QBw'
+BOT_TOKEN = '8651546298:AAHVdnjJi1MNojVj6GmFbNWsEoKTVnOlGcU' # ⚠️ नया टोकन यहाँ डालें
 OWNER_ID = [5938871512, 890749443] 
 
-bot = Client("ProDownloader", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+# in_memory=True लगाने से Railway पर Telegram का FloodWait error नहीं आएगा
+bot = Client("ProDownloader", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, in_memory=True)
 
 # ===== COMMANDS =====
 @bot.on_message(filters.command(["start"]) & filters.user(OWNER_ID))
@@ -101,7 +102,6 @@ async def upload(bot: Client, m: Message):
     await input6.delete(True)
     await editable.delete()
 
-    # WGET Fix: Python ka apna downloader use kiya hai
     if thumb_url.startswith("http"):
         try:
             urllib.request.urlretrieve(thumb_url, "thumb.jpg")
@@ -147,14 +147,12 @@ async def upload(bot: Client, m: Message):
                 await asyncio.sleep(1)
                 continue
 
-            # 3. CLASSPLUS DRM LOGIC (Clean URL + Token System)
+            # 3. CLASSPLUS DRM LOGIC
             elif "classplus" in url or "cpvod" in url:
-                # 💡 MOST IMPORTANT FIX: m3u8 ko mpd me badalna
                 clean_url = url.replace("master.m3u8", "master.mpd").replace("?quality=auto", "")
                 
                 prog = await m.reply_text(Show + "\n\n🔐 **DRM Decryption Started...**")
                 
-                # App.py ko clean URL aur Working Token pass karna
                 drm_data = generate_drm_keys(clean_url, cp_token)
                 
                 if "error" in drm_data:
@@ -166,7 +164,6 @@ async def upload(bot: Client, m: Message):
                 keys_list = drm_data["keys"]
                 keys_string = " ".join([f"--key {k}" for k in keys_list])
                 
-                # core.py se N_m3u8DL-RE call karna
                 res_file = await helper.decrypt_and_merge_video(mpd_link, keys_string, "./downloads/", name, raw_res)
                 await prog.delete(True)
                 await helper.send_vid(bot, m, cc, res_file, thumb, name, prog)
