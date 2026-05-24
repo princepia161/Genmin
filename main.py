@@ -124,7 +124,7 @@ async def upload(bot: Client, m: Message):
         
         try:
             # 1. DRM Classplus Processing (Advance Level)
-            if "classplusapp.com/drm/" in url or "cpvod" in url:
+            if "classplus" in url or "cpvod" in url:
                 prog = await m.reply_text(Show + "\n\n🔐 **DRM Decryption Started...**")
                 
                 # app.py se keys generate karna
