@@ -12,7 +12,7 @@ from app import generate_drm_keys
 
 API_ID = 20807000
 API_HASH = 'cde2366a7c61e23f4cb44618cbe6cf70'
-BOT_TOKEN = '8564398983:AAGxMpPkmLcgZsPnVzIQzCUIro5KNk76QBw'
+BOT_TOKEN = '8651546298:AAHVdnjJi1MNojVj6GmFbNWsEoKTVnOlGcU'
 OWNER_ID = [5938871512, 890749443] 
 
 bot = Client("ProDownloader", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, in_memory=True)
