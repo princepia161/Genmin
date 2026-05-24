@@ -9,31 +9,34 @@ import pyromod.listen
 import core as helper
 from app import generate_drm_keys
 
-# ===== CONFIG =====
+# ===== CONFIGURATION =====
 API_ID = 20807000
 API_HASH = 'cde2366a7c61e23f4cb44618cbe6cf70'
-BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE' # ⚠️ यहाँ अपना टोकन डालें
-OWNER_ID = [5938871512, 890749443] 
+BOT_TOKEN = '7686849126:AAFjtFz6YZlLP-FnadMvrFTJIsphVr1OYEY' # ⚠️ अपना टोकन यहाँ बदलें
+OWNER_ID = [890749443] # ⚠️ आपकी सही ID
 
+# in_memory=True: यह सबसे ज़रूरी है ताकि Session फाइल करप्ट न हो
 bot = Client("ProDownloader", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, in_memory=True)
 
-# 🛡️ DEBUG MODE: यह पता लगाने के लिए कि बॉट मैसेज देख रहा है या नहीं
+# ===== DEBUG MODE =====
 @bot.on_message(filters.all)
-async def debug_all_messages(bot, m: Message):
-    print(f"DEBUG: Message received from {m.chat.id}: {m.text}")
+async def debug_log(bot, m: Message):
+    # Railway के Logs में ये चेक करने के लिए कि बॉट को मैसेज मिल रहा है या नहीं
+    print(f"DEBUG: Message from {m.chat.id}: {m.text or 'File/Media'}")
 
 # ===== COMMANDS =====
 @bot.on_message(filters.command(["start"]) & filters.user(OWNER_ID))
 async def start_command(bot: Client, message: Message):
-    await message.reply_text("✅ **Bot is Working!** Send /txt to start.")
+    await message.reply_text("✅ **Bot is Running!**\nSend /txt to start downloading.")
 
 @bot.on_message(filters.command(["txt"]) & filters.user(OWNER_ID))
 async def upload(bot: Client, m: Message):
-    editable = await m.reply_text("⚡ **Send your .txt file** ⚡")
+    editable = await m.reply_text("⚡ **Send the .txt file now (As Document)** ⚡")
     try:
         input_msg: Message = await bot.listen(editable.chat.id, timeout=300)
+        
         if not input_msg.document:
-            await editable.edit("❌ **Error:** Please send as a FILE/DOCUMENT.")
+            await editable.edit("❌ **Error:** Please send the file as a **Document**, not as text.")
             return
 
         x = await input_msg.download()
@@ -43,17 +46,16 @@ async def upload(bot: Client, m: Message):
             links = [line.split("://", 1) for line in f.read().splitlines() if "://" in line]
         os.remove(x)
 
-        await editable.edit("📚 **Batch Name?** (Send 1 for default)")
-        b_name_m = await bot.listen(editable.chat.id)
-        b_name = "Course" if b_name_m.text == '1' else b_name_m.text
+        # Inputs
+        await editable.edit("📚 **Batch Name?**")
+        b_name = (await bot.listen(editable.chat.id)).text
         
         await editable.edit("**📸 Resolution?** (e.g. 720)")
-        res_m = await bot.listen(editable.chat.id)
-        raw_res = res_m.text
+        raw_res = (await bot.listen(editable.chat.id)).text
+        res = {"720": "1280x720", "480": "854x480"}.get(raw_res, "1280x720")
         
         await editable.edit("**Token?**")
-        tok_m = await bot.listen(editable.chat.id)
-        cp_token = tok_m.text
+        cp_token = (await bot.listen(editable.chat.id)).text
         
         await editable.delete()
 
@@ -70,7 +72,7 @@ async def upload(bot: Client, m: Message):
                     await prog.edit(f"❌ **DRM Error:** {drm_data['error']}")
                     continue
                 keys_str = " ".join([f"--key {k}" for k in drm_data['keys']])
-                res_file = await helper.decrypt_and_merge_video(drm_data["mpd_url"], keys_str, "./downloads/", name, raw_res)
+                res_file = await helper.decrypt_and_merge_video(drm_data["mpd_url"], keys_str, "./downloads/", name, res)
             else:
                 cmd = f'yt-dlp -f "bv+ba/b" "{url}" -o "{name}.mp4"'
                 res_file = await helper.download_video(url, cmd, name)
