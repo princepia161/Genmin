@@ -6,12 +6,12 @@ import time
 import asyncio
 import requests
 import urllib.parse
+import urllib.request
 import cloudscraper
-from subprocess import getstatusoutput
 
 # Pyrogram & Pyromod Imports
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import Message
 from pyrogram.errors import FloodWait
 import pyromod.listen
 
@@ -23,7 +23,7 @@ from app import generate_drm_keys
 API_ID = 20807000
 API_HASH = 'cde2366a7c61e23f4cb44618cbe6cf70'
 BOT_TOKEN = '8564398983:AAGxMpPkmLcgZsPnVzIQzCUIro5KNk76QBw'
-OWNER_ID = [5938871512, 890749443] # Dono IDs add kar di hain
+OWNER_ID = [5938871512, 890749443] 
 
 bot = Client("ProDownloader", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
@@ -101,9 +101,13 @@ async def upload(bot: Client, m: Message):
     await input6.delete(True)
     await editable.delete()
 
+    # WGET Fix: Python ka apna downloader use kiya hai
     if thumb_url.startswith("http"):
-        getstatusoutput(f"wget '{thumb_url}' -O 'thumb.jpg'")
-        thumb = "thumb.jpg"
+        try:
+            urllib.request.urlretrieve(thumb_url, "thumb.jpg")
+            thumb = "thumb.jpg"
+        except:
+            thumb = "no"
     else:
         thumb = "no"
 
@@ -117,17 +121,14 @@ async def upload(bot: Client, m: Message):
         name1 = links[i][0].replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").strip()
         name = f'{str(i+1).zfill(3)}) {name1[:60]}'
         
-        # Caption Setup
         cc = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(i+1).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} .mkv`\n🖥️ **Resolution:** [{raw_res}]\n📘 **Course:** `{b_name}`\n🚀 **Extracted By:** `{CR}`'
-
         Show = f"✈️ 𝗣𝗥𝗢𝗚𝗥𝗘𝗦𝗦 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(i+1).zfill(3)}\n\n**📩 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Resolution** : {raw_res}\n├── **Extracted By** : {CR}"
         
         try:
-            # 1. DRM Classplus Processing (Advance Level)
+            # 403 Forbidden Fix: "classplus" catch karega, bhale hi "/drm/" na likha ho
             if "classplus" in url or "cpvod" in url:
                 prog = await m.reply_text(Show + "\n\n🔐 **DRM Decryption Started...**")
                 
-                # app.py se keys generate karna
                 drm_data = generate_drm_keys(url)
                 
                 if "error" in drm_data:
@@ -139,14 +140,12 @@ async def upload(bot: Client, m: Message):
                 keys_list = drm_data["keys"]
                 keys_string = " ".join([f"--key {k}" for k in keys_list])
                 
-                # core.py se decrypt and merge
                 res_file = await helper.decrypt_and_merge_video(mpd_link, keys_string, "./downloads/", name, raw_res)
                 await prog.delete(True)
                 await helper.send_vid(bot, m, cc, res_file, thumb, name, prog)
                 await asyncio.sleep(1)
                 continue
 
-            # 2. PDF Downloading
             elif ".pdf" in url:
                 prog = await m.reply_text(Show + "\n\n📄 **Downloading PDF...**")
                 cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
@@ -157,17 +156,16 @@ async def upload(bot: Client, m: Message):
                 await asyncio.sleep(1)
                 continue
                 
-            # 3. Image Downloading
             elif any(ext in url.lower() for ext in [".jpg", ".jpeg", ".png"]):
                 prog = await m.reply_text(Show + "\n\n🖼️ **Downloading Image...**")
-                os.system(f"wget '{url}' -O '{name}.jpg'")
+                # WGET Fix for Images
+                urllib.request.urlretrieve(url, f"{name}.jpg")
                 await bot.send_photo(chat_id=m.chat.id, photo=f'{name}.jpg', caption=cc)
                 await prog.delete(True)
                 os.remove(f'{name}.jpg')
                 await asyncio.sleep(1)
                 continue
 
-            # 4. Normal Video Processing (YT-DLP)
             else:
                 prog = await m.reply_text(Show)
                 
